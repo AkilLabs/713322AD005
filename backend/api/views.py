@@ -84,3 +84,38 @@ def top_users(request):
         return Response(top5_users, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+
+
+@api_view(['GET'])
+def get_posts(request):
+    post_type = request.GET.get('type')
+    if post_type not in ['popular', 'latest']:
+        return Response(
+            {"error": "Invalid query param. Use type=popular or type=latest"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        users = fetch_users()
+        all_posts = []
+
+        for user_id, user_name in users.items():
+            posts = fetch_posts(user_id)
+            for post in posts:
+                post["user_id"] = user_id
+                post["user_name"] = user_name
+                post["comment_count"] = len(fetch_comments(post.get("id")))
+                all_posts.append(post)
+
+        if post_type == "popular":
+            sorted_posts = sorted(all_posts, key=lambda x: x["comment_count"], reverse=True)
+        else:
+            sorted_posts = sorted(all_posts, key=lambda x: x["id"], reverse=True)
+
+        top_posts = sorted_posts[:5]
+        return Response(top_posts, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
