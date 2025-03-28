@@ -69,3 +69,18 @@ def get_posts(request):
         return Response(top_posts, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+@api_view(['GET'])
+def top_users(request):
+    try:
+        users = fetch_users()
+        user_post_counts = [
+            {"user_id": user_id, "user_name": user_name, "post_count": len(fetch_posts(user_id))}
+            for user_id, user_name in users.items()
+        ]
+        top5_users = sorted(user_post_counts, key=lambda x: x["post_count"], reverse=True)[:5]
+        return Response(top5_users, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
