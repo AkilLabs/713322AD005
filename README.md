@@ -10,6 +10,9 @@ cd Round1
 Django(python)
 ```
 cd backend
+```
+change the AUTH_TOKEN
+```
 python manage.py runserver
 ```
 
